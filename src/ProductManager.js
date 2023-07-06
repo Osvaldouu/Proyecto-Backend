@@ -1,8 +1,14 @@
+import fs from "fs";
 const Product = require("./Product.js");
 
 class ProductManager {
   #products = [];
   #idNumber = 0;
+  #filePath = "products.json";
+
+  constructor() {
+    this._loadProducts();
+  }
 
   _addProduct(data) {
     if (this._validateCode(data[4])) {
@@ -19,8 +25,21 @@ class ProductManager {
     const product = new Product(this.#idNumber, ...data);
     this.#products.push(product);
     console.log(product);
-  }
 
+    this._saveProducts();
+  }
+  _deleteProduct(id) {
+    const productIndex = this.#products.findIndex((p) => p.id === id);
+    if (productIndex === -1) {
+      console.error("Product not found");
+      return;
+    }
+
+    const deletedProduct = this.#products.splice(productIndex, 1)[0];
+    console.log("Product deleted:", deletedProduct);
+
+    this._saveProducts();
+  }
   _getProducts() {
     console.table(this.#products);
     return this.#products;
@@ -56,16 +75,33 @@ class ProductManager {
       if (el === "" || el === undefined || el === null) return true;
     });
   }
+
+  _loadProducts() {
+    try {
+      const data = fs.readFileSync(this.#filePath, "utf8");
+      this.#products = JSON.parse(data);
+    } catch (error) {
+      console.error("Error al cargar los productos:", error);
+    }
+  }
+
+  _saveProducts() {
+    try {
+      const data = JSON.stringify(this.#products);
+      fs.writeFileSync(this.#filePath, data, "utf8");
+      console.log("Productos guardados correctamente.");
+    } catch (error) {
+      console.error("Error al guardar los productos:", error);
+    }
+  }
 }
 
 const test = new ProductManager();
 
-test._addProduct(["zapatillas", "rojas", 150, "http://", "123abc", 20]);
-test._addProduct(["zapatillas", "negras", 130, "http://", "456abc", 20]);
-test._addProduct(["zapatillas", "azules", 110, "http://", "789abc", 30]);
-test._addProduct(["zapatillas", "azules", 110, "http://", "123abc", 20]);
-test._addProduct(["zapatillas", , 110, "http://", "phtabc"]); 
-test._addProduct(["zapatillas", "azules", 110, "", "kyhabc"]);
+test._addProduct(["remeras", "negras", 110, "http://", "boca"]);
 test._getProducts();
 test._getProductById(1);
 test._getProductById(5);
+
+
+module.exports = ProductManager
