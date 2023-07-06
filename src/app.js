@@ -1,14 +1,14 @@
 import express  from "express"
 import ProductManager from "./ProductManager"
 import Product from "./Product"
-
+//const products = require("products.json")
 
 const PORT = 3001
 
 const app = express()
 
-app.get("/home", (req, res) => {
-    res.status(200).send("Petizo Man")
+app.get("/products", (req, res) => {
+    res.status(200).json(products)
 })
 
 app.listen(PORT, () => {
